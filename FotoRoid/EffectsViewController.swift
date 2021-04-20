@@ -8,22 +8,66 @@
 import UIKit
 
 class EffectsViewController: UIViewController {
-
+    
+    
+    @IBOutlet weak var collectionView: UICollectionView!
+    @IBOutlet weak var viLoading: UIView!
+    @IBOutlet weak var ivPhoto: UIImageView!
+    
+    var image: UIImage!
+    lazy var filterManager: FilterManager = {
+        var filterManager = FilterManager(image: image)
+        return filterManager
+    }()
+    
+    let filterImagesNames = ["comic","sepia","halftone","crystallize","vignete","noir"]
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-
-        // Do any additional setup after loading the view.
+        ivPhoto.image = image
+        
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        navigationController?.setNavigationBarHidden(false, animated: true)
+    }
+    
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        let vc = segue.destination as! FinalViewController
+        vc.image = ivPhoto.image
+    }
+    func showLoading(_ show: Bool) {
+        viLoading.isHidden = !show
     }
     
 
-    /*
-    // MARK: - Navigation
+}
 
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destination.
-        // Pass the selected object to the new view controller.
+extension EffectsViewController: UICollectionViewDataSource, UICollectionViewDelegate {
+    func numberOfSections(in collectionView: UICollectionView) -> Int {
+        return 1
     }
-    */
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        return filterManager.filterNames.count
+    }
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "cell", for: indexPath) as! EffectsCollectionViewCell
+        cell.ivEffect.image = UIImage(named: filterImagesNames[indexPath.row])
+        return cell
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        if let type = FilterType(rawValue: indexPath.row) {
+            showLoading(true)
+            DispatchQueue.global(qos: .userInitiated).async {
+                _ = self.filterManager.applyFilter(type: type)
+               
+                
+            }
+            
+            
+        }
+    }
 
 }

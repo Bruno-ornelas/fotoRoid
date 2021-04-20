@@ -9,4 +9,7 @@ import UIKit
 
 class EffectsCollectionViewCell: UICollectionViewCell {
     
+    
+    @IBOutlet weak var ivEffect: UIImageView!
+    
 }
